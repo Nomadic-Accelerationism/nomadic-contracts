@@ -2,7 +2,7 @@
 // Deployed at: 0x950650fda9c97c24aa90c6f0c3e8d9ddba4a48fb
 pragma solidity ^0.8.13;
 
-import "fhenix-contracts/contracts/FHE.sol";
+import "lib/fhenix-contracts/contracts/FHE.sol";
 
 contract Journey {
     // check if we can encrypt this...

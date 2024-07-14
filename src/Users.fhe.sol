@@ -2,7 +2,7 @@
 // Deployed at: 0x2A19790B6Dd1fC70e45e6F0D64A1a61C79a5Da0c
 pragma solidity ^0.8.13;
 
-import "fhenix-contracts/contracts/FHE.sol";
+import "lib/fhenix-contracts/contracts/FHE.sol";
 
 contract Users {
 
