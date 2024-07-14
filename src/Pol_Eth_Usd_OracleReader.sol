@@ -8,6 +8,8 @@ pragma solidity ^0.8.16;
  * @dev Addresses in this contract are hardcoded for the Polygon zkEVM Testnet.
  * For other supported networks, check the https://chroniclelabs.org/dashboard/oracles.
  */
+
+ // Deployed at: 0x2A19790B6Dd1fC70e45e6F0D64A1a61C79a5Da0c
 contract POL_ETH_USD_OracleReader {
     /**
     * @notice The Chronicle oracle to read from.
