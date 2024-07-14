@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 // Owner must be encrypted
-// Owner should have zk proof of budget
 pragma solidity ^0.8.13;
 
 contract HackerHouse {
