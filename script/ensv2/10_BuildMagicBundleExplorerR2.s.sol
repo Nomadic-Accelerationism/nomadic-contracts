@@ -17,6 +17,18 @@ contract BuildMagicBundleExplorerR2Script is ENSv2ExecutionBase {
         uint256 value;
     }
 
+    struct TransactionGroup {
+        string label;
+        address to;
+        bytes data;
+        uint256 value;
+        bool atomic;
+        uint256 estimatedGas;
+        string precondition;
+        string postcondition;
+        Call[] calls;
+    }
+
     function run() external view {
         ENSv2DeploymentProfiles.Profile memory deployment = _loadProfile();
         _requireSepolia(deployment);
@@ -48,17 +60,21 @@ contract BuildMagicBundleExplorerR2Script is ENSv2ExecutionBase {
         }
 
         string memory issuedAt = vm.envOr("ENSV2_ISSUED_AT", vm.toString(block.timestamp));
-        Call[] memory calls = _buildCalls(deployment, user, issuer, passportRegistry, passportResolver, issuedAt);
+        Call[] memory logicalCalls =
+            _buildLogicalCalls(deployment, user, issuer, passportRegistry, passportResolver, issuedAt);
+        TransactionGroup[] memory groups = _groupCalls(passportRegistry, passportResolver, logicalCalls);
 
         console2.log("passportRegistry", passportRegistry);
         console2.log("passportResolver", passportResolver);
         console2.log("expectedSigner", user);
-        console2.log(string.concat("callCount=", vm.toString(calls.length)));
-        console2.log(_toJson(user, issuer, passportRegistry, passportResolver, issuedAt, calls));
+        console2.log(string.concat("logicalContractCalls=", vm.toString(logicalCalls.length)));
+        console2.log(string.concat("onchainTransactions=", vm.toString(groups.length)));
+        console2.log(string.concat("expectedMagicConfirmations=", vm.toString(groups.length)));
+        console2.log(_toJson(user, issuer, passportRegistry, passportResolver, issuedAt, logicalCalls.length, groups));
         console2.log("RESULT: Magic transaction bundle generated (read-only)");
     }
 
-    function _buildCalls(
+    function _buildLogicalCalls(
         ENSv2DeploymentProfiles.Profile memory deployment,
         address user,
         address issuer,
@@ -152,6 +168,100 @@ contract BuildMagicBundleExplorerR2Script is ENSv2ExecutionBase {
         require(i == calls.length, "Magic bundle call count");
     }
 
+    function _groupCalls(address passportRegistry, address passportResolver, Call[] memory logicalCalls)
+        internal
+        pure
+        returns (TransactionGroup[] memory groups)
+    {
+        require(logicalCalls.length == 19, "expected 19 logical calls");
+        groups = new TransactionGroup[](5);
+
+        Call[] memory parentCalls = _slice(logicalCalls, 0, 1);
+        groups[0] = TransactionGroup({
+            label: "Configure Passport registry",
+            to: passportRegistry,
+            data: logicalCalls[0].data,
+            value: 0,
+            atomic: true,
+            estimatedGas: 76_565,
+            precondition: "Passport registry deployed; Magic owns victor",
+            postcondition: "Passport registry canonical parent is Nomadic registry",
+            calls: parentCalls
+        });
+
+        Call[] memory passportRecordCalls = _slice(logicalCalls, 1, 5);
+        groups[1] = TransactionGroup({
+            label: "Set Passport records",
+            to: passportResolver,
+            data: abi.encodeCall(
+                IENSv2R2Resolver.multicallWithNodeCheck,
+                (NameCoder.namehash(NameCoder.encode(PASSPORT_NAME), 0), _callData(passportRecordCalls))
+            ),
+            value: 0,
+            atomic: true,
+            estimatedGas: 305_394,
+            precondition: "Magic is Passport resolver root admin",
+            postcondition: "Passport addr and four text records are readable",
+            calls: passportRecordCalls
+        });
+
+        Call[] memory credentialRegistrationCalls = _slice(logicalCalls, 6, 1);
+        groups[2] = TransactionGroup({
+            label: "Register Lisbon credential",
+            to: passportRegistry,
+            data: logicalCalls[6].data,
+            value: 0,
+            atomic: true,
+            estimatedGas: 162_012,
+            precondition: "Passport registry parent configured; Magic has ROLE_REGISTRAR",
+            postcondition: "Credential ERC-1155 owner is Magic",
+            calls: credentialRegistrationCalls
+        });
+
+        Call[] memory credentialRecordCalls = _slice(logicalCalls, 7, 8);
+        groups[3] = TransactionGroup({
+            label: "Set credential records",
+            to: passportResolver,
+            data: abi.encodeCall(
+                IENSv2R2Resolver.multicallWithNodeCheck,
+                (NameCoder.namehash(NameCoder.encode(CREDENTIAL_NAME), 0), _callData(credentialRecordCalls))
+            ),
+            value: 0,
+            atomic: true,
+            estimatedGas: 304_997,
+            precondition: "Credential registration succeeded",
+            postcondition: "Eight credential text records are readable",
+            calls: credentialRecordCalls
+        });
+
+        Call[] memory authorizationCalls = _slice(logicalCalls, 15, 4);
+        groups[4] = TransactionGroup({
+            label: "Authorize scoped issuer keys",
+            to: passportResolver,
+            data: abi.encodeCall(IENSv2R2Resolver.multicall, (_callData(authorizationCalls))),
+            value: 0,
+            atomic: true,
+            estimatedGas: 267_596,
+            precondition: "Credential records initialized; issuer distinct from platform and Magic",
+            postcondition: "Issuer has only four exact per-key text permissions",
+            calls: authorizationCalls
+        });
+    }
+
+    function _slice(Call[] memory source, uint256 start, uint256 count) private pure returns (Call[] memory result) {
+        result = new Call[](count);
+        for (uint256 i; i < count; ++i) {
+            result[i] = source[start + i];
+        }
+    }
+
+    function _callData(Call[] memory calls) private pure returns (bytes[] memory data) {
+        data = new bytes[](calls.length);
+        for (uint256 i; i < calls.length; ++i) {
+            data[i] = calls[i].data;
+        }
+    }
+
     function _textCall(address resolver, bytes32 node, string memory key, string memory value, string memory label)
         private
         pure
@@ -168,7 +278,8 @@ contract BuildMagicBundleExplorerR2Script is ENSv2ExecutionBase {
         address passportRegistry,
         address passportResolver,
         string memory issuedAt,
-        Call[] memory calls
+        uint256 logicalCallCount,
+        TransactionGroup[] memory groups
     ) private view returns (string memory json) {
         json = string.concat(
             '{"chainId":11155111,"deploymentProfile":"explorer-v1-r2",',
@@ -184,8 +295,46 @@ contract BuildMagicBundleExplorerR2Script is ENSv2ExecutionBase {
             vm.toString(passportResolver),
             '","issuedAt":"',
             issuedAt,
-            '","calls":['
+            '","logicalContractCalls":',
+            vm.toString(logicalCallCount),
+            ',"onchainTransactions":',
+            vm.toString(groups.length),
+            ',"expectedMagicConfirmations":',
+            vm.toString(groups.length),
+            ',"transactionGroups":['
         );
+        for (uint256 i; i < groups.length; ++i) {
+            if (i != 0) json = string.concat(json, ",");
+            json = string.concat(
+                json,
+                '{"index":',
+                vm.toString(i + 1),
+                ',"label":"',
+                groups[i].label,
+                '","to":"',
+                vm.toString(groups[i].to),
+                '","data":"',
+                vm.toString(groups[i].data),
+                '","value":"',
+                vm.toString(groups[i].value),
+                '","atomic":',
+                groups[i].atomic ? "true" : "false",
+                ',"estimatedGas":',
+                vm.toString(groups[i].estimatedGas),
+                ',"preconditions":["',
+                groups[i].precondition,
+                '"],"postconditions":["',
+                groups[i].postcondition,
+                '"],"calls":',
+                _callsJson(groups[i].calls),
+                "}"
+            );
+        }
+        return string.concat(json, "]}");
+    }
+
+    function _callsJson(Call[] memory calls) private view returns (string memory json) {
+        json = "[";
         for (uint256 i; i < calls.length; ++i) {
             if (i != 0) json = string.concat(json, ",");
             json = string.concat(
@@ -201,6 +350,6 @@ contract BuildMagicBundleExplorerR2Script is ENSv2ExecutionBase {
                 '"}'
             );
         }
-        return string.concat(json, "]}");
+        return string.concat(json, "]");
     }
 }

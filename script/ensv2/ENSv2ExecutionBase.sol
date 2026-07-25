@@ -54,6 +54,8 @@ interface IENSv2R2Resolver {
     function authorizeTextRoles(bytes calldata name, string calldata key, address account, bool grant)
         external
         returns (bool);
+    function multicall(bytes[] calldata calls) external returns (bytes[] memory results);
+    function multicallWithNodeCheck(bytes32 node, bytes[] calldata calls) external returns (bytes[] memory results);
 }
 
 interface IENSv2UniversalResolver {
