@@ -48,6 +48,10 @@ Prepared script:
 script/ensv2/08_SetParentExplorerR2.s.sol
 ```
 
+**Executed on Sepolia** (`2026-07-25`). Public receipt and postconditions:
+[`ENSV2_SEPOLIA_EXECUTION_LOG.md`](./ENSV2_SEPOLIA_EXECUTION_LOG.md) (Stage 1).
+Stage 2 was not executed in that step.
+
 Signer: platform.
 
 Target:
