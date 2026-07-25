@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
-import {Script, console2} from "forge-std/Script.sol";
+import {console2} from "forge-std/Script.sol";
 import {ERC1155Holder} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import {NameCoder} from "@ens/contracts/utils/NameCoder.sol";
 import {VerifiableFactory} from "@ensdomains/verifiable-factory/VerifiableFactory.sol";
@@ -17,11 +17,13 @@ import {LabelStore} from "ensv2/utils/LabelStore.sol";
 import {IContractNamer} from "ensv2/reverse-registrar/interfaces/IContractNamer.sol";
 
 import {NomadicRecords} from "../../src/ensv2/NomadicRecords.sol";
-import {SepoliaENSv2} from "../../src/ensv2/SepoliaENSv2.sol";
+import {ENSv2DeploymentProfiles} from "../../src/ensv2/ENSv2DeploymentProfiles.sol";
+import {ENSv2ExecutionBase} from "./ENSv2ExecutionBase.sol";
 
 /// @notice Simulation-only Passport provisioning plan. Never broadcasts. No private key required.
-contract PlanPassportScript is Script, ERC1155Holder {
+contract PlanPassportScript is ENSv2ExecutionBase, ERC1155Holder {
     function run() external {
+        ENSv2DeploymentProfiles.Profile memory deployment = _loadProfile();
         require(!vm.envOr("ENSV2_BROADCAST", false), "ENSV2_BROADCAST must be false");
 
         string memory parentName = vm.envOr("ENSV2_PARENT_NAME", string(""));
@@ -30,9 +32,10 @@ contract PlanPassportScript is Script, ERC1155Holder {
         address user = vm.envOr("ENSV2_PASSPORT_OWNER_ADDRESS", makeAddr("user"));
 
         console2.log("=== PLAN: Passport provisioning (simulation only) ===");
-        console2.log("Sepolia VerifiableFactory", SepoliaENSv2.VERIFIABLE_FACTORY);
-        console2.log("Sepolia UserRegistryImpl", SepoliaENSv2.USER_REGISTRY_IMPL);
-        console2.log("Sepolia PermissionedResolverImpl", SepoliaENSv2.PERMISSIONED_RESOLVER_IMPL);
+        console2.log("deploymentProfile", deployment.name);
+        console2.log("Sepolia VerifiableFactory", deployment.verifiableFactory);
+        console2.log("Sepolia UserRegistryImpl", deployment.userRegistryImpl);
+        console2.log("Sepolia PermissionedResolverImpl", deployment.permissionedResolverImpl);
         console2.log("configured parentName", parentName);
         console2.log("passportLabel", passportLabel);
         console2.log("platform", platform);

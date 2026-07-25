@@ -1,19 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
-import {Script, console2} from "forge-std/Script.sol";
+import {console2} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 import {IRegistry} from "ensv2/registry/interfaces/IRegistry.sol";
 import {IPermissionedRegistry} from "ensv2/registry/interfaces/IPermissionedRegistry.sol";
+import {ENSv2DeploymentProfiles} from "../../src/ensv2/ENSv2DeploymentProfiles.sol";
 import {SepoliaENSv2} from "../../src/ensv2/SepoliaENSv2.sol";
+import {ENSv2ExecutionBase} from "./ENSv2ExecutionBase.sol";
 
 /// @notice Read-only Sepolia ENSv2 deployment verification. Never broadcasts.
-contract VerifyDeploymentScript is Script {
+contract VerifyDeploymentScript is ENSv2ExecutionBase {
     using stdJson for string;
 
     function run() external {
+        ENSv2DeploymentProfiles.Profile memory deployment = _loadProfile();
+        _requireCurrent(deployment);
         uint256 chainId = block.chainid;
         console2.log("chainId", chainId);
         require(chainId == SepoliaENSv2.CHAIN_ID, "wrong chain: expected Sepolia 11155111");

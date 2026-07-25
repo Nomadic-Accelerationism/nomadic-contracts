@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
-import {Script, console2} from "forge-std/Script.sol";
+import {console2} from "forge-std/Script.sol";
 import {NameCoder} from "@ens/contracts/utils/NameCoder.sol";
 
 import {IRegistry} from "ensv2/registry/interfaces/IRegistry.sol";
@@ -12,12 +12,14 @@ import {RegistryRolesLib} from "ensv2/registry/libraries/RegistryRolesLib.sol";
 import {IUniversalResolverV2} from "ensv2/universalResolver/interfaces/IUniversalResolverV2.sol";
 import {UniversalResolverV2} from "ensv2/universalResolver/UniversalResolverV2.sol";
 
-import {SepoliaENSv2} from "../../src/ensv2/SepoliaENSv2.sol";
+import {ENSv2DeploymentProfiles} from "../../src/ensv2/ENSv2DeploymentProfiles.sol";
+import {ENSv2ExecutionBase} from "./ENSv2ExecutionBase.sol";
 
 /// @notice Read-only parent namespace inspection. Never broadcasts. Never hardcodes a parent name.
-contract InspectParentScript is Script {
+contract InspectParentScript is ENSv2ExecutionBase {
     function run() external view {
-        require(block.chainid == SepoliaENSv2.CHAIN_ID, "wrong chain: expected Sepolia 11155111");
+        ENSv2DeploymentProfiles.Profile memory deployment = _loadProfile();
+        _requireSepolia(deployment);
 
         string memory parentName = vm.envOr("ENSV2_PARENT_NAME", string(""));
         require(
@@ -27,11 +29,12 @@ contract InspectParentScript is Script {
         address platform = vm.envOr("ENSV2_PLATFORM_ADDRESS", address(0));
 
         bytes memory dnsName = NameCoder.encode(parentName);
+        console2.log("deploymentProfile", deployment.name);
         console2.log("parentName", parentName);
         console2.logBytes(dnsName);
 
-        IUniversalResolverV2 ur = IUniversalResolverV2(SepoliaENSv2.UNIVERSAL_RESOLVER_V2);
-        UniversalResolverV2 urConcrete = UniversalResolverV2(SepoliaENSv2.UNIVERSAL_RESOLVER_V2);
+        IUniversalResolverV2 ur = IUniversalResolverV2(deployment.universalResolver);
+        UniversalResolverV2 urConcrete = UniversalResolverV2(deployment.universalResolver);
 
         IRegistry exact = ur.findExactRegistry(dnsName);
         IRegistry canonical = ur.findCanonicalRegistry(dnsName);
@@ -105,14 +108,14 @@ contract InspectParentScript is Script {
         console2.log("childRegistry", address(childRegistry));
         console2.log("platformAppearsAbleToCreateChild", platformCanCreateChild ? "true" : "false");
 
-        bool suitable = address(childRegistry) != address(0) && owner != address(0)
-            && (platform == address(0) || platformCanCreateChild);
+        bool canonicalReady = address(canonical) == address(childRegistry) && address(canonical) != address(0);
+        console2.log("canonicalParentReady", canonicalReady ? "true" : "false");
+
+        bool suitable = canonicalReady && owner != address(0) && (platform == address(0) || platformCanCreateChild);
         console2.log("parentSuitableForPrototype", suitable ? "true" : "false");
 
         if (!suitable) {
-            revert(
-                "parent not suitable for prototype: need resolvable parent registry/owner and (if set) platform registrar"
-            );
+            revert("parent not suitable: require canonical registry, owner, and platform registrar");
         }
         console2.log("RESULT: parent inspection PASSED (read-only)");
     }

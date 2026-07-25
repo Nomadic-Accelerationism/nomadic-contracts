@@ -4,6 +4,11 @@ Read-only preflight for the first real Nomadic Passport issuance on Ethereum Sep
 
 **Status:** simulation-backed plan complete. **No transactions broadcast.**
 
+> This document describes the `current` deployment profile. The registered Explorer-r2 parent
+> and guarded execution package are documented in
+> [`ENSV2_EXPLORER_R2_EXECUTION_PLAN.md`](./ENSV2_EXPLORER_R2_EXECUTION_PLAN.md). Never combine
+> addresses from the two profiles.
+
 Target hierarchy:
 
 ```text

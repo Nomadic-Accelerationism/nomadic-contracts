@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
-import {Script, console2} from "forge-std/Script.sol";
+import {console2} from "forge-std/Script.sol";
 import {ERC1155Holder} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import {NameCoder} from "@ens/contracts/utils/NameCoder.sol";
 import {VerifiableFactory} from "@ensdomains/verifiable-factory/VerifiableFactory.sol";
@@ -16,10 +16,12 @@ import {LabelStore} from "ensv2/utils/LabelStore.sol";
 import {IContractNamer} from "ensv2/reverse-registrar/interfaces/IContractNamer.sol";
 
 import {NomadicRecords} from "../../src/ensv2/NomadicRecords.sol";
+import {ENSv2ExecutionBase} from "./ENSv2ExecutionBase.sol";
 
 /// @notice Simulation-only credential child plan. Never broadcasts. No private key required.
-contract PlanCredentialScript is Script, ERC1155Holder {
+contract PlanCredentialScript is ENSv2ExecutionBase, ERC1155Holder {
     function run() external {
+        _loadProfile();
         require(!vm.envOr("ENSV2_BROADCAST", false), "ENSV2_BROADCAST must be false");
 
         string memory passportLabel = vm.envOr("ENSV2_PASSPORT_LABEL", string("victor"));

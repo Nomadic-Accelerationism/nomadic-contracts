@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
-import {Script, console2} from "forge-std/Script.sol";
+import {console2} from "forge-std/Script.sol";
 import {ERC1155Holder} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import {NameCoder} from "@ens/contracts/utils/NameCoder.sol";
 import {VerifiableFactory} from "@ensdomains/verifiable-factory/VerifiableFactory.sol";
@@ -13,10 +13,12 @@ import {PermissionedResolver} from "ensv2/resolver/PermissionedResolver.sol";
 import {PermissionedResolverLib} from "ensv2/resolver/libraries/PermissionedResolverLib.sol";
 
 import {NomadicRecords} from "../../src/ensv2/NomadicRecords.sol";
+import {ENSv2ExecutionBase} from "./ENSv2ExecutionBase.sol";
 
 /// @notice Simulation-only issuer permission grant/revoke plan. Never broadcasts.
-contract PlanIssuerPermissionsScript is Script, ERC1155Holder {
+contract PlanIssuerPermissionsScript is ENSv2ExecutionBase, ERC1155Holder {
     function run() external {
+        _loadProfile();
         require(!vm.envOr("ENSV2_BROADCAST", false), "ENSV2_BROADCAST must be false");
 
         address user = vm.envOr("ENSV2_PASSPORT_OWNER_ADDRESS", makeAddr("user"));

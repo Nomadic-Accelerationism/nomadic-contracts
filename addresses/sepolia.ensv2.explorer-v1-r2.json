@@ -1,0 +1,36 @@
+{
+  "profile": "explorer-v1-r2",
+  "network": "sepolia",
+  "chainId": 11155111,
+  "deployedAt": "2026-05-25",
+  "upstreamCommit": "48b3e2d39513b9dd32ef1850877a29009bc807b9",
+  "source": "lib/ens-contracts-v2/contracts/deployments/sepolia-official-v1-20260525-r2",
+  "artifactNamespace": "lib/ens-contracts-v2/contracts/deployments/sepolia-official-v1-20260525-r2",
+  "addresses": {
+    "RootRegistry": "0xc960F7217d3643B525Ef36Bec8Adf86953CD9aB8",
+    "ETHRegistry": "0xDEDB92913A25abE1f7BCDD85D8A344a43B398B67",
+    "ETHRegistrar": "0x8c2E866B439358c41AE05De9cbE8A00BFEFafFcA",
+    "BatchRegistrar": "0xB39C2dA7143DFFa4a097970887fA6f1d17C1d60f",
+    "VerifiableFactory": "0xD2a632D8a8b67c2c4398c255CbD7aF8dd7236198",
+    "UserRegistryImpl": "0x0F99e7Ea74903AfCB7224d0354fD7428A6f92917",
+    "WrapperRegistryImpl": "0x9d9D230d9B894d3CC14Fc7801031F45Cd5007f18",
+    "PermissionedResolverImpl": "0xdcE5205A553573FFd47629327DDdf36186022FfA",
+    "PublicResolverV2": "0x5239a812eC9a62F46DbB5De8F346C8eFE7553A9f",
+    "UniversalResolverV2": "0x2F8A180604c42457Cb56C7c4f708748fF1F91DF1",
+    "UpgradableUniversalResolverProxy": "0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe",
+    "ManagedUniversalResolverProxy": "0x6d80F2172CFdEc5730fE683860C33d26fC42e6F1",
+    "NomadicUserRegistry": "0x8fB12e7Ab9B192503d7d02a43e0507c484e27280",
+    "NomadicResolver": "0xa39e2EC60d8b34F88c16A5829ae5759C0C34CC4B",
+    "MockUSDC": "0xBA11ebdB3f9a2c5946D8629517f06364E53A2E10",
+    "MockDAI": "0x2922bCD677AF690fCD1eCc699519e4BFaBc73ff8"
+  },
+  "expectedRuntimeHashes": {
+    "RootRegistryNormalized": "0x9d62bb24144ac1e8676d498e15433e861f53193f62e78ad9471d9b2093057fa0",
+    "ETHRegistryNormalized": "0x9d62bb24144ac1e8676d498e15433e861f53193f62e78ad9471d9b2093057fa0",
+    "ETHRegistrarNormalized": "0x490973097588e43b6514d3031e2d5a1b8bf8e4d6c87ecabb4386d60bf298874c",
+    "VerifiableFactoryNormalized": "0x3bf5d759be93285d49cedbe8bd5c64a85982f414ae4aea97109b2f79d34bd079",
+    "UserRegistryImplNormalized": "0x6395ca2e6ce882f423c22ad33b56f7725d84481b6bd60589e2f6e8ff1dd6cc1c",
+    "PermissionedResolverImplNormalized": "0x8e19ec7a7b9b3b600467bb99a7c149f25cf9a5559a6fa2dde3d34c1cb44551c1",
+    "UniversalResolverV2Normalized": "0x1359dd8732811e5fcc4dc161e7d14c18eff9c91493d6cd128a1c707991b08881"
+  }
+}

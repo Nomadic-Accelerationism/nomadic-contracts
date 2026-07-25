@@ -31,7 +31,9 @@ forge script script/ensv2/04_PlanIssuerPermissions.s.sol -vvv
 
 ## Environment
 
-See `.env.example`. No private key is required for this scaffold.
+See `.env.example`. No private key is required for this scaffold. Every script now requires an
+explicit `ENSV2_DEPLOYMENT_PROFILE`; see
+[`ENSV2_DEPLOYMENT_PROFILES.md`](./ENSV2_DEPLOYMENT_PROFILES.md).
 
 ## Parent-name blocker
 

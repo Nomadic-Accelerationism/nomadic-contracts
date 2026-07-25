@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
-import {Script, console2} from "forge-std/Script.sol";
+import {console2} from "forge-std/Script.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {NameCoder} from "@ens/contracts/utils/NameCoder.sol";
 import {VerifiableFactory} from "@ensdomains/verifiable-factory/VerifiableFactory.sol";
@@ -19,7 +19,9 @@ import {PermissionedResolverLib} from "ensv2/resolver/libraries/PermissionedReso
 import {IUniversalResolverV2} from "ensv2/universalResolver/interfaces/IUniversalResolverV2.sol";
 
 import {NomadicRecords} from "../../src/ensv2/NomadicRecords.sol";
+import {ENSv2DeploymentProfiles} from "../../src/ensv2/ENSv2DeploymentProfiles.sol";
 import {SepoliaENSv2} from "../../src/ensv2/SepoliaENSv2.sol";
+import {ENSv2ExecutionBase} from "./ENSv2ExecutionBase.sol";
 
 interface IMockUSDC {
     function mint(address to, uint256 amount) external;
@@ -27,7 +29,7 @@ interface IMockUSDC {
 
 /// @notice Full Sepolia-fork simulation of Nomadic Passport issuance. Never broadcasts.
 /// @dev forge script script/ensv2/06_SimulateIssuanceFork.s.sol --fork-url $SEPOLIA_RPC_URL -vvv
-contract SimulateIssuanceForkScript is Script {
+contract SimulateIssuanceForkScript is ENSv2ExecutionBase {
     address internal constant MOCK_USDC = 0xD3322B29a7BdEe707D1684676f149bf41Aa3422f;
 
     // Empty-code Sepolia EOAs for defaults. Do NOT use forge-std makeAddr("user"):
@@ -36,10 +38,6 @@ contract SimulateIssuanceForkScript is Script {
     address internal constant DEFAULT_USER = 0x263d44bE3B07686a0f6CcF2Bc81d2b6d89eBeB5b;
     address internal constant DEFAULT_ISSUER = 0xc0b76553a2A5DD6D5Ba5f6AefD178615C079f64b;
 
-    string internal constant PARENT_LABEL = "nomadic-passport";
-    string internal constant PARENT_NAME = "nomadic-passport.eth";
-    string internal constant PASSPORT_LABEL = "victor";
-    string internal constant CREDENTIAL_LABEL = "lisbon-house";
     uint64 internal constant REGISTER_DURATION = 365 days;
 
     struct Actors {
@@ -65,6 +63,8 @@ contract SimulateIssuanceForkScript is Script {
     uint256 internal txCount;
 
     function run() external {
+        ENSv2DeploymentProfiles.Profile memory deployment = _loadProfile();
+        _requireCurrent(deployment);
         require(!vm.envOr("ENSV2_BROADCAST", false), "ENSV2_BROADCAST must be false");
         require(block.chainid == SepoliaENSv2.CHAIN_ID, "fork must be Sepolia (11155111)");
 
