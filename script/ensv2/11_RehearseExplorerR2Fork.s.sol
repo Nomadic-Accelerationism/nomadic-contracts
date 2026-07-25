@@ -100,7 +100,7 @@ contract RehearseExplorerR2ForkScript is ENSv2ExecutionBase {
         for (uint256 i; i < magicGroupGas.length; ++i) {
             console2.log(string.concat("magic_group_", vm.toString(i + 1), "_gas=", vm.toString(magicGroupGas[i])));
         }
-        console2.log("syntheticIssuer", actors.issuer);
+        console2.log("issuer", actors.issuer);
         console2.log("magic7702Enabled", useMagic7702 ? "true" : "false");
         console2.log("passportRegistry", hierarchy.passportRegistry);
         console2.log("passportResolver", hierarchy.passportResolver);

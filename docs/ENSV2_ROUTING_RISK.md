@@ -73,10 +73,41 @@ to normal Universal Resolver record reads, even though their r2 registry state r
 
 ## Go/no-go condition
 
-**NO-GO:** routing is only observed live but ENS has not confirmed its stability.
+**NO-GO:** routing is only observed live but ENS has not confirmed its stability for the demo
+window.
 
-**GO:** ENS confirms that the public top route will continue to serve Explorer-r2 throughout the
-demo, the guard passes at execution time, and operators intentionally set the routing ACK.
+**GO for the confirmed window:** ENS confirms that the public top route will continue to serve
+Explorer-r2 throughout the named presentation/judging period, the live guard passes at execution
+time, and operators intentionally set the routing ACK.
+
+This is **not** a permanent routing guarantee. After the confirmed window, re-check the managed
+proxy before any further issuance.
+
+## ENS confirmation record
+
+| Field | Value |
+| --- | --- |
+| Status | Received |
+| Date | `2026-07-25` |
+| Confirmed scope | ETHGlobal Lisbon presentation and judging |
+| Permanent guarantee | **No** — window-scoped confirmation only |
+| Confirmed route | `0xeEeE…EeEe` → `0x6d80…e6F1` → `0x2F8A…1DF1` → Explorer-r2 RootRegistry `0xc960…9aB8` |
+
+The ENS team confirmed that this temporary public routing will remain active during ETHGlobal
+Lisbon presentation and judging. No individual ENS team-member name or verbatim quote is recorded
+here because none was supplied for publication.
+
+Operators may set:
+
+```bash
+ENSV2_ROUTING_ACK=explorer-v1-r2-confirmed
+```
+
+only while executing within that confirmed window and after the live routing guard still passes.
+
+If a screenshot or written confirmation artifact is available, store it under
+`docs/assets/ens-routing-confirmation-2026-07-25.*` and link it from this section. Do not invent
+attribution.
 
 ## Recovery if routing changes after issuance
 

@@ -1,6 +1,7 @@
 # ENSv2 Explorer-r2 Execution Plan
 
-Status: **prepared but blocked from broadcast pending ENS routing confirmation**.
+Status: **technical GO for the confirmed ETHGlobal Lisbon presentation/judging window**.
+Broadcast remains operator-gated. This package does not auto-broadcast.
 
 Target:
 
@@ -16,9 +17,9 @@ nomadic-passport.eth
 | --- | --- | --- |
 | Platform | `NOMADIC_PARENT_OWNER_ADDRESS` | `0xca490deA7D7D79Bac4537D5Fe68fF10cd9c7EbEd` |
 | Passport owner | `PASSPORT_OWNER_ADDRESS` | `0xd114FA765bA4811219AAe364c93CE8A81Ad39B17` |
-| Lisbon issuer | `LISBON_HOUSE_ISSUER_ADDRESS` | pending; must differ from both |
+| Lisbon issuer | `LISBON_HOUSE_ISSUER_ADDRESS` | `0x3505b68444Db0E71987090769e5283AfC0efBd62` |
 
-No script reads or references a private key.
+No script reads or references a private key. Keep personal `.env` local and gitignored.
 
 ## Go/no-go gates
 
@@ -28,15 +29,16 @@ Before every state-changing phase:
 2. chain ID `11155111`;
 3. routing guard passes;
 4. exact signer matches the operation;
-5. ENS has confirmed routing stability;
-6. only then may an operator intentionally set:
+5. ENS window confirmation is still valid (`2026-07-25`, ETHGlobal Lisbon presentation and judging — see `ENSV2_ROUTING_RISK.md`);
+6. balances meet stage requirements;
+7. only then may an operator intentionally set:
 
 ```bash
 ENSV2_BROADCAST=true
 ENSV2_ROUTING_ACK=explorer-v1-r2-confirmed
 ```
 
-Do not set the acknowledgement yet.
+Unset `ENSV2_ROUTING_ACK` again after each platform broadcast stage.
 
 ## Phase 1 — Canonical parent link
 
@@ -226,6 +228,7 @@ until SDK versions, delegate target and sponsorship policy are pinned.
 ENSV2_DEPLOYMENT_PROFILE=explorer-v1-r2 \
 NOMADIC_PARENT_OWNER_ADDRESS=0xca490deA7D7D79Bac4537D5Fe68fF10cd9c7EbEd \
 PASSPORT_OWNER_ADDRESS=0xd114FA765bA4811219AAe364c93CE8A81Ad39B17 \
+LISBON_HOUSE_ISSUER_ADDRESS=0x3505b68444Db0E71987090769e5283AfC0efBd62 \
 forge script script/ensv2/11_RehearseExplorerR2Fork.s.sol \
   --fork-url "$SEPOLIA_RPC_URL" -vv
 ```

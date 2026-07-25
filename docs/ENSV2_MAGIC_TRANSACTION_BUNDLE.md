@@ -78,8 +78,11 @@ The final log line is frontend-consumable JSON:
     {
       "index": 1,
       "label": "Configure Passport registry",
+      "expectedSigner": "0xd114FA765bA4811219AAe364c93CE8A81Ad39B17",
       "to": "0x40776D16B117b04FD5C08458E14ff8CF6518a40E",
+      "targets": ["0x40776D16B117b04FD5C08458E14ff8CF6518a40E"],
       "data": "0x...",
+      "calldata": "0x...",
       "value": "0",
       "atomic": true,
       "estimatedGas": 76565,
